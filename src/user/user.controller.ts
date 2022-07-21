@@ -24,6 +24,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.Admin)
   createUser(@Body() userDto: CreateUserDto): Promise<UserDocument> {
     return this.userService.createUser(userDto);
   }

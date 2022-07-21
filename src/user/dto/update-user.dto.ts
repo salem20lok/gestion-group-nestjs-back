@@ -1,11 +1,13 @@
 export class UpdateUserDto {
-  firstName: string;
+  firstName?: string;
 
-  lastName: string;
+  lastName?: string;
 
-  email: string;
+  email?: string;
 
-  roles: string[];
+  roles?: string[];
 
-  avatar: string;
+  avatar?: string;
+
+  group?: string;
 }

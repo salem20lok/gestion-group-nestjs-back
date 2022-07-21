@@ -17,4 +17,8 @@ export class CreateUserDto {
   password: string;
 
   avatar: string;
+
+  group: string;
+
+  roles: string[];
 }

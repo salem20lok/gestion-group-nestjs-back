@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { User } from '../../user/schemas/user.schema';
 
 export type GroupDocument = Group & Document;
 
@@ -10,18 +9,13 @@ export class Group {
   name: string;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed,
     required: true,
-    ref: User.name,
   })
-  groupManger: string;
-
-  @Prop({
-    type: [mongoose.Schema.Types.ObjectId],
-    required: true,
-    ref: User.name,
-  })
-  users: string[];
+  groupManger: {
+    $ref: string;
+    $id: mongoose.Schema.Types.ObjectId;
+  };
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

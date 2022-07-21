@@ -18,12 +18,16 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async createUser(userDto: CreateUserDto): Promise<UserDocument> {
-    const { password, email } = userDto;
+    const { password, email, group } = userDto;
 
     const found = await this.userModel.findOne({ email: email });
 
     if (found)
       throw new ConflictException(`this mail: ${email} is ealready exist `);
+
+    if (!group) {
+      userDto.group = null;
+    }
 
     try {
       const salt = await bcrypt.genSalt();
@@ -39,7 +43,7 @@ export class UserService {
 
   async getAllUser(): Promise<UserDocument[]> {
     try {
-      const users = await this.userModel.find({});
+      const users = await this.userModel.find({}).populate('group');
       return users;
     } catch (e) {
       throw new NotFoundException();
@@ -70,28 +74,34 @@ export class UserService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
-    const { email, firstName, lastName, roles, avatar } = updateUserDto;
+    const { email, firstName, lastName, roles, avatar, group } = updateUserDto;
     const found = await this.userModel.findById(id);
     if (!found) throw new NotFoundException(`this id : ${id} not exist `);
 
-    const query = {
+    const query: UpdateUserDto = {
       email: email,
       firstName: firstName,
       lastName: lastName,
       roles: roles,
       avatar: avatar,
+      group: group,
     };
 
+    if (!roles) delete query.roles;
     if (!email) delete query.email;
     if (!firstName) delete query.firstName;
     if (!lastName) delete query.lastName;
     if (!avatar) delete query.avatar;
+    if (!group) delete query.group;
+
+    if (group === '') query.group = null;
 
     try {
       await this.userModel.findByIdAndUpdate(id, query);
       const user = await this.userModel.findById(id);
       return user;
     } catch (e) {
+      console.log(e);
       if (!found) throw new NotFoundException(`this id : ${id} not exist `);
     }
   }
@@ -123,5 +133,12 @@ export class UserService {
 
   async add(user: { id: string }): Promise<void> {
     await this.userModel.findByIdAndUpdate(user.id, { roles: ['user'] });
+  }
+
+  async deleteGroup(idGroup: string): Promise<void> {
+    const found: UserDocument[] = await this.userModel.find({ group: idGroup });
+    found.map(async (el) => {
+      await this.userModel.findByIdAndUpdate(el._id, { group: null });
+    });
   }
 }

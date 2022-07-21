@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
-import { GetUser } from '../auth/guards/get-user.decorator';
 import { GroupDocument } from './schemas/groupe.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/authorization/roles.guard';
@@ -25,11 +24,7 @@ export class GroupController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.Admin)
-  createGroup(
-    @Body() createGroup: CreateGroupDto,
-    @GetUser() id: string,
-  ): Promise<GroupDocument> {
-    createGroup.groupManger = id;
+  createGroup(@Body() createGroup: CreateGroupDto): Promise<GroupDocument> {
     return this.groupService.createGroup(createGroup);
   }
 
